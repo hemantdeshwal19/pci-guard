@@ -9,6 +9,7 @@ PATTERNS = [
 
 SKIP_DIRS = {".git", "node_modules", "venv", ".venv", "__pycache__", "tests"}
 
+
 @dataclass
 class Finding:
     rule_id: str

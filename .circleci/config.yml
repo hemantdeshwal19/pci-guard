@@ -23,7 +23,7 @@ jobs:
           command: pip install --user -r requirements.txt
       - run:
           name: Run unit tests
-          command: ~/.local/bin/pytest tests/ -v
+          command: python -m pytest tests/ -v
 
   self-scan:
     docker:
