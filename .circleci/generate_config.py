@@ -55,31 +55,73 @@ def build_continuation_config(targets: list) -> dict:
                         }
                     },
                     {
+                        "restore_cache": {
+                            "keys": [
+                                "pip-deps-v1-{{ checksum \"requirements.txt\" }}"
+                            ]
+                        }
+                    },
+                    {
                         "run": {
                             "name": "Install pci-guard deps",
                             "command": "pip install --user -r requirements.txt",
                         }
                     },
                     {
+                        "save_cache": {
+                            "key": "pip-deps-v1-{{ checksum \"requirements.txt\" }}",
+                            "paths": [
+                                "~/.local/lib/python3.10/site-packages",
+                                "~/.local/bin",
+                            ],
+                        }
+                    },
+                    {
+                        "restore_cache": {
+                            "keys": ["opa-v0.65.0"]
+                        }
+                    },
+                    {
                         "run": {
                             "name": "Install OPA",
                             "command": LiteralStr(
-                                "curl -L -o $HOME/bin/opa "
+                                "if [ ! -f $HOME/bin/opa ]; then\n"
+                                "  curl -L -o $HOME/bin/opa "
                                 "https://openpolicyagent.org/downloads/v0.65.0/opa_linux_amd64_static\n"
-                                "chmod +x $HOME/bin/opa\n"
+                                "  chmod +x $HOME/bin/opa\n"
+                                "fi\n"
                             ),
+                        }
+                    },
+                    {
+                        "save_cache": {
+                            "key": "opa-v0.65.0",
+                            "paths": ["~/.local/bin/opa"],
+                        }
+                    },
+                    {
+                        "restore_cache": {
+                            "keys": ["trivy-v0.70.0"]
                         }
                     },
                     {
                         "run": {
                             "name": "Install Trivy",
                             "command": LiteralStr(
-                                "curl -sfL https://raw.githubusercontent.com/aquasecurity/"
+                                "if [ ! -f $HOME/bin/trivy ]; then\n"
+                                "  curl -sfL https://raw.githubusercontent.com/aquasecurity/"
                                 "trivy/main/contrib/install.sh | sh -s -- -b $HOME/bin v0.70.0\n"
+                                "fi\n"
                             ),
                         }
                     },
-                   {
+                    {
+                        "save_cache": {
+                            "key": "trivy-v0.70.0",
+                            "paths": ["~/.local/bin/trivy"],
+                        }
+                    },
+                    {
                         "run": {
                             "name": "Clone target if external",
                             "command": LiteralStr(
