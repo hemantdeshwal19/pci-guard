@@ -47,6 +47,14 @@ jobs:
       - run:
           name: Preview generated config
           command: cat /tmp/continuation.yml
+      - run:
+          name: Install CircleCI CLI
+          command: |
+            curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/main/install.sh | sudo bash
+            circleci version
+      - run:
+          name: Validate generated config
+          command: circleci config validate /tmp/continuation.yml
       - continuation/continue:
           configuration_path: /tmp/continuation.yml
 
