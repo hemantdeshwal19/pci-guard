@@ -1,37 +1,18 @@
 version: 2.1
 
+setup: true
+
+orbs:
+  continuation: circleci/continuation@1.0.0
+
 jobs:
-  lint:
+  setup:
     docker:
       - image: cimg/python:3.10
     steps:
       - checkout
       - run:
-          name: Install lint deps
-          command: pip install --user flake8
-      - run:
-          name: Run flake8
-          command: ~/.local/bin/flake8 pci_guard --max-line-length=120
-
-  test:
-    docker:
-      - image: cimg/python:3.10
-    steps:
-      - checkout
-      - run:
-          name: Install deps
-          command: pip install --user -r requirements.txt
-      - run:
-          name: Run unit tests
-          command: python -m pytest tests/ -v
-
-  self-scan:
-    docker:
-      - image: cimg/python:3.10
-    steps:
-      - checkout
-      - run:
-          name: Install deps
+          name: Install pci-guard deps
           command: pip install --user -r requirements.txt
       - run:
           name: Set up PATH
@@ -43,26 +24,31 @@ jobs:
           command: |
             curl -L -o $HOME/bin/opa https://openpolicyagent.org/downloads/v0.65.0/opa_linux_amd64_static
             chmod +x $HOME/bin/opa
-            opa version
       - run:
           name: Install Trivy
           command: |
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $HOME/bin v0.70.0
-            trivy --version
       - run:
-          name: Run pci-guard against this repo
-          command: python -m pci_guard.cli scan --target . --output report
-      - store_artifacts:
-          path: report
-          destination: pci-compliance-report  
+          name: Clone external targets
+          command: |
+            git clone --depth 1 --branch main \
+              https://github.com/hemantdeshwal19/payment-fraud-detection.git \
+              /tmp/targets/payment-fraud-detection
+      - run:
+          name: Detect stacks and generate continuation config
+          command: |
+            python3 .circleci/generate_config.py \
+              --targets \
+                "pci-guard:." \
+                "payment-fraud-detection:/tmp/targets/payment-fraud-detection" \
+              --output /tmp/continuation.yml
+      - run:
+          name: Preview generated config
+          command: cat /tmp/continuation.yml
+      - continuation/continue:
+          configuration_path: /tmp/continuation.yml
 
 workflows:
-  build-test-scan:
+  setup-workflow:
     jobs:
-      - lint
-      - test:
-          requires:
-            - lint
-      - self-scan:
-          requires:
-            - test
+      - setup
