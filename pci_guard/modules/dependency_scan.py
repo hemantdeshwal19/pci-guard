@@ -43,7 +43,7 @@ def scan(target_dir: str) -> ScanResult:
         )
 
         output = json.loads(proc.stdout)
-        for dep in output:
+        for dep in output.get("dependencies", []):
             for vuln in dep.get("vulns", []):
                 severity = _map_severity(vuln.get("fix_versions", []))
                 result.findings.append(
