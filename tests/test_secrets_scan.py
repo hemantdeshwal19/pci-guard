@@ -56,7 +56,7 @@ def test_detects_github_token(temp_repo):
 
 
 def test_detects_stripe_key(temp_repo):
-    write_file(temp_repo, "payment.py", 'STRIPE_KEY = "sk_test_FAKE_KEY_FOR_TESTING_ONLY_1234"\n')
+    write_file(temp_repo, "payment.py", 'STRIPE_KEY = "sk_test_FAKEKEY000000000000000000"\n')
     result = scan(temp_repo)
     assert any(f.rule_id == "stripe_key" for f in result.findings)
 
