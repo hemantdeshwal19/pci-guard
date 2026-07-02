@@ -168,7 +168,7 @@ def build_continuation_config(targets: list) -> dict:
                 "name": f"scan-{target['name']}",
                 "target_name": target["name"],
                 "target_path": target["path"],
-                "run_dependency_scan": "has_python_deps" in target["signals"],
+                "run_dependency_scan": bool({"has_python_deps", "has_node_deps"} & target["signals"]),
                 "run_container_scan": "has_dockerfile" in target["signals"],
             }
         }
