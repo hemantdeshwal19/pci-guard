@@ -40,6 +40,10 @@ jobs:
             chmod +x opa
             sudo mv opa /usr/local/bin/opa
       - run:
+          name: Install Trivy
+          command: |
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.70.0      
+      - run:
           name: Run pci-guard against this repo
           command: python -m pci_guard.cli scan --target . --output report
       - store_artifacts:

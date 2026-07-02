@@ -2,21 +2,33 @@ import argparse
 import os
 import sys
 
-from pci_guard.modules import secrets_scan
+from pci_guard.modules import secrets_scan, dependency_scan, container_scan
 from pci_guard.policy import engine
 from pci_guard.report import generator
+from pci_guard import stack_detector
 
 RULES_DIR = os.path.join(os.path.dirname(__file__), "policy", "rules")
 
+# (scan_function, rego_file, rego_package, required_signal)
+# required_signal=None means always run regardless of stack
 MODULE_REGISTRY = [
-    (secrets_scan.scan, "req_3_8_secrets.rego", "pciguard.req_3_8_secrets"),
+    (secrets_scan.scan,    "req_3_8_secrets.rego",   "pciguard.req_3_8_secrets",  None),
+    (dependency_scan.scan, "req_6_3_dependency.rego", "pciguard.req_6_3_dependency", "has_python_deps"),
+    (container_scan.scan,  "req_2_6_container.rego",  "pciguard.req_2_6_container",  "has_dockerfile"),
 ]
 
 
 def run_scan(target: str, output: str) -> int:
+    signals = stack_detector.detect(target)
+    print(f"Detected stack signals: {signals}\n")
+
     policy_results = []
 
-    for scan_fn, rego_file, package in MODULE_REGISTRY:
+    for scan_fn, rego_file, package, required_signal in MODULE_REGISTRY:
+        if required_signal and required_signal not in signals:
+            print(f"[SKIP] {package} — {required_signal} not detected in target")
+            continue
+
         scan_result = scan_fn(target)
         rego_path = os.path.join(RULES_DIR, rego_file)
         result = engine.evaluate(scan_result.to_dict(), rego_path, package)
