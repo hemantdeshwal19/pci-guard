@@ -9,9 +9,6 @@ jobs:
   setup:
     docker:
       - image: cimg/python:3.10
-    setup:
-    docker:
-      - image: cimg/python:3.10
     steps:
       - checkout
       - restore_cache:
