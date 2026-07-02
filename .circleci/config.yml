@@ -34,21 +34,27 @@ jobs:
           name: Install deps
           command: pip install --user -r requirements.txt
       - run:
+          name: Set up PATH
+          command: |
+            echo 'export PATH=$HOME/bin:$PATH' >> $BASH_ENV
+            mkdir -p $HOME/bin
+      - run:
           name: Install OPA
           command: |
-            curl -L -o opa https://openpolicyagent.org/downloads/v0.65.0/opa_linux_amd64_static
-            chmod +x opa
-            sudo mv opa /usr/local/bin/opa
+            curl -L -o $HOME/bin/opa https://openpolicyagent.org/downloads/v0.65.0/opa_linux_amd64_static
+            chmod +x $HOME/bin/opa
+            opa version
       - run:
           name: Install Trivy
           command: |
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.70.0      
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $HOME/bin v0.70.0
+            trivy --version
       - run:
           name: Run pci-guard against this repo
           command: python -m pci_guard.cli scan --target . --output report
       - store_artifacts:
           path: report
-          destination: pci-compliance-report
+          destination: pci-compliance-report  
 
 workflows:
   build-test-scan:
