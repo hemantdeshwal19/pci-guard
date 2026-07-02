@@ -31,9 +31,11 @@ jobs:
       - run:
           name: Clone external targets
           command: |
-            git clone --depth 1 --branch main \
-              https://github.com/hemantdeshwal19/payment-fraud-detection.git \
+            git clone https://github.com/hemantdeshwal19/payment-fraud-detection.git \
               /tmp/targets/payment-fraud-detection
+            cd /tmp/targets/payment-fraud-detection
+            git checkout 31dc1746ee51f3dbee0fc8f54ee186341fc328ff
+            cd -
       - run:
           name: Detect stacks and generate continuation config
           command: |

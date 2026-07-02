@@ -79,14 +79,17 @@ def build_continuation_config(targets: list) -> dict:
                             ),
                         }
                     },
-                    {
+                   {
                         "run": {
                             "name": "Clone target if external",
                             "command": LiteralStr(
                                 "if [ '<< parameters.target_path >>' != '.' ]; then\n"
-                                "  git clone --depth 1 --branch main \\\n"
+                                "  git clone \\\n"
                                 "    https://github.com/hemantdeshwal19/<< parameters.target_name >>.git \\\n"
                                 "    << parameters.target_path >>\n"
+                                "  cd << parameters.target_path >>\n"
+                                "  git checkout 31dc1746ee51f3dbee0fc8f54ee186341fc328ff\n"
+                                "  cd -\n"
                                 "fi\n"
                             ),
                         }
