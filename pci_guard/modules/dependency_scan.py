@@ -52,7 +52,10 @@ def scan(target_dir: str) -> ScanResult:
                         file_path="requirements.txt",
                         line_number=0,
                         pci_requirement="Req 6.3.3",
-                        snippet=f"{dep['name']}=={dep['version']} — {vuln.get('id')} — {vuln.get('description', '')[:80]}",
+                        snippet=(
+                            f"{dep['name']}=={dep['version']} "
+                            f"— {vuln.get('id')} — {vuln.get('description', '')[:80]}"
+                        ),
                         severity=severity,
                     )
                 )
