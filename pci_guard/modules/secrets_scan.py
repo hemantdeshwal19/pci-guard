@@ -1,6 +1,6 @@
 import re
 import os
-from dataclasses import dataclass, field
+from pci_guard.models import Finding, ScanResult
 
 
 PATTERNS = [
@@ -10,31 +10,8 @@ PATTERNS = [
 SKIP_DIRS = {".git", "node_modules", "venv", ".venv", "__pycache__", "tests"}
 
 
-@dataclass
-class Finding:
-    rule_id: str
-    file_path: str
-    line_number: int
-    pci_requirement: str
-    snippet: str
-    severity: str = "high"
-
-
-@dataclass
-class ScanResult:
-    module: str = "secrets_scan"
-    findings: list = field(default_factory=list)
-
-    def to_dict(self):
-        return {
-            "module": self.module,
-            "finding_count": len(self.findings),
-            "findings": [vars(f) for f in self.findings],
-        }
-
-
 def scan(target_dir: str) -> ScanResult:
-    result = ScanResult()
+    result = ScanResult(module="secrets_scan")
     compiled = [(name, re.compile(pattern), req) for name, pattern, req in PATTERNS]
 
     for root, dirs, files in os.walk(target_dir):

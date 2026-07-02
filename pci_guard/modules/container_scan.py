@@ -1,34 +1,11 @@
 import json
 import subprocess
 import os
-from dataclasses import dataclass, field
-
-
-@dataclass
-class Finding:
-    rule_id: str
-    file_path: str
-    line_number: int
-    pci_requirement: str
-    snippet: str
-    severity: str = "high"
-
-
-@dataclass
-class ScanResult:
-    module: str = "container_scan"
-    findings: list = field(default_factory=list)
-
-    def to_dict(self):
-        return {
-            "module": self.module,
-            "finding_count": len(self.findings),
-            "findings": [vars(f) for f in self.findings],
-        }
+from pci_guard.models import Finding, ScanResult
 
 
 def scan(target_dir: str) -> ScanResult:
-    result = ScanResult()
+    result = ScanResult("container_scan")
 
     dockerfile = os.path.join(target_dir, "Dockerfile")
     if not os.path.exists(dockerfile):
