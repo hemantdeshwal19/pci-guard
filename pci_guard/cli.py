@@ -13,7 +13,7 @@ RULES_DIR = os.path.join(os.path.dirname(__file__), "policy", "rules")
 # required_signal=None means always run regardless of stack
 MODULE_REGISTRY = [
     (secrets_scan.scan,    "req_3_8_secrets.rego",   "pciguard.req_3_8_secrets",  None),
-    (dependency_scan.scan, "req_6_3_dependency.rego", "pciguard.req_6_3_dependency", "has_python_deps"),
+    (dependency_scan.scan, "req_6_3_dependency.rego", "pciguard.req_6_3_dependency", frozenset({"has_python_deps", "has_node_deps"})),  
     (container_scan.scan,  "req_2_6_container.rego",  "pciguard.req_2_6_container",  "has_dockerfile"),
 ]
 
@@ -25,8 +25,12 @@ def run_scan(target: str, output: str) -> int:
     policy_results = []
 
     for scan_fn, rego_file, package, required_signal in MODULE_REGISTRY:
-        if required_signal and required_signal not in signals:
-            print(f"[SKIP] {package} — {required_signal} not detected in target")
+        if required_signal and (
+            signals.isdisjoint(required_signal)
+            if isinstance(required_signal, frozenset)
+            else required_signal not in signals
+        ):
+
             continue
 
         scan_result = scan_fn(target)
