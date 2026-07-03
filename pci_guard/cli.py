@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-from pci_guard.modules import secrets_scan, dependency_scan, container_scan
+from pci_guard.modules import secrets_scan, dependency_scan, container_scan, history_scan
 from pci_guard.policy import engine
 from pci_guard.report import generator
 from pci_guard import stack_detector
@@ -13,8 +13,10 @@ RULES_DIR = os.path.join(os.path.dirname(__file__), "policy", "rules")
 # (scan_function, rego_file, rego_package, required_signal)
 # required_signal=None means always run regardless of stack
 MODULE_REGISTRY = [
-    (secrets_scan.scan,    "req_3_8_secrets.rego",   "pciguard.req_3_8_secrets",  None),
-    (dependency_scan.scan, "req_6_3_dependency.rego", "pciguard.req_6_3_dependency", frozenset({"has_python_deps", "has_node_deps"})),  
+    (secrets_scan.scan,    "req_3_8_secrets.rego",   "pciguard.req_3_8_secrets",   None),
+    (history_scan.scan,    "req_3_8_history.rego",   "pciguard.req_3_8_history",   None),
+    (dependency_scan.scan, "req_6_3_dependency.rego", "pciguard.req_6_3_dependency",
+     frozenset({"has_python_deps", "has_node_deps"})),
     (container_scan.scan,  "req_2_6_container.rego",  "pciguard.req_2_6_container",  "has_dockerfile"),
 ]
 

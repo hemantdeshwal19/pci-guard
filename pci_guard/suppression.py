@@ -13,7 +13,6 @@ Wildcards in file_path support fnmatch patterns (e.g. tests/*, *.bak).
 
 import fnmatch
 import os
-from pci_guard.models import Finding
 
 
 def load_suppressions(target_dir: str) -> list:

@@ -1,0 +1,8 @@
+# Test fixtures containing fake credentials for scanner testing
+history/stripe_key:tests/test_secrets_scan.py
+history/generic_api_key:tests/test_secrets_scan.py
+history/private_key_header:tests/test_secrets_scan.py
+history/generic_password:tests/test_secrets_scan.py
+history/db_connection_string:tests/test_secrets_scan.py
+history/github_token:tests/test_secrets_scan.py
+history/aws_access_key:tests/test_secrets_scan.py
