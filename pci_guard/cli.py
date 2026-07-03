@@ -6,6 +6,7 @@ from pci_guard.modules import secrets_scan, dependency_scan, container_scan
 from pci_guard.policy import engine
 from pci_guard.report import generator
 from pci_guard import stack_detector
+from pci_guard import suppression
 
 RULES_DIR = os.path.join(os.path.dirname(__file__), "policy", "rules")
 
@@ -22,6 +23,10 @@ def run_scan(target: str, output: str) -> int:
     signals = stack_detector.detect(target)
     print(f"Detected stack signals: {signals}\n")
 
+    suppressions = suppression.load_suppressions(target)
+    if suppressions:
+        print(f"Loaded {len(suppressions)} suppression rule(s) from .pciguardignore\n")
+
     policy_results = []
 
     for scan_fn, rego_file, package, required_signal in MODULE_REGISTRY:
@@ -30,10 +35,15 @@ def run_scan(target: str, output: str) -> int:
             if isinstance(required_signal, frozenset)
             else required_signal not in signals
         ):
-
             continue
 
         scan_result = scan_fn(target)
+        kept, suppressed = suppression.apply(scan_result.findings, suppressions)
+
+        if suppressed:
+            print(f"[SUPPRESSED] {len(suppressed)} finding(s) suppressed in {package}")
+
+        scan_result.findings = kept
         rego_path = os.path.join(RULES_DIR, rego_file)
         result = engine.evaluate(scan_result.to_dict(), rego_path, package)
         policy_results.append(result)
