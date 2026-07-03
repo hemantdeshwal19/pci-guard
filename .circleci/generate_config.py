@@ -39,8 +39,6 @@ def build_continuation_config(targets: list) -> dict:
                 "parameters": {
                     "target_name": {"type": "string"},
                     "target_path": {"type": "string"},
-                    "run_dependency_scan": {"type": "boolean", "default": False},
-                    "run_container_scan": {"type": "boolean", "default": False},
                 },
                 "docker": [{"image": "cimg/python:3.10"}],
                 "steps": [
@@ -168,8 +166,6 @@ def build_continuation_config(targets: list) -> dict:
                 "name": f"scan-{target['name']}",
                 "target_name": target["name"],
                 "target_path": target["path"],
-                "run_dependency_scan": bool({"has_python_deps", "has_node_deps"} & target["signals"]),
-                "run_container_scan": "has_dockerfile" in target["signals"],
             }
         }
         config["workflows"]["pci-scan-matrix"]["jobs"].append(job_entry)
